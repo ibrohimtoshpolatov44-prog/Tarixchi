@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarixchi - Professional</title>
+    <style>
+        :root { --bg: #fdfcf9; --primary: #2c3e50; --accent: #d4a373; --admin: #27ae60; --text: #333; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; color: var(--text); }
+
+        nav { background: var(--primary); color: white; padding: 15px; position: sticky; top: 0; z-index: 1000; display: flex; justify-content: space-between; align-items: center; }
+        .menu-toggle { cursor: pointer; font-size: 1.2rem; }
+        
+        .sidebar { position: fixed; left: -280px; top: 0; width: 260px; height: 100%; background: var(--primary); transition: 0.3s; z-index: 2000; padding-top: 60px; }
+        .sidebar.open { left: 0; }
+        .sidebar a { display: block; color: white; padding: 15px 25px; text-decoration: none; border-bottom: 1px solid #34495e; }
+        .sidebar .close-btn { position: absolute; top: 10px; right: 20px; font-size: 2rem; cursor: pointer; }
+
+        .container { max-width: 800px; margin: auto; padding: 20px; }
+        .page { display: none; animation: fadeIn 0.4s; }
+        .active-page { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-top: 4px solid var(--accent); position: relative; }
+        .card img { max-width: 100%; border-radius: 8px; margin-bottom: 10px; display: block; }
+        .btn-link { display: inline-block; background: var(--accent); color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; margin-top: 10px; font-weight: bold; width: 100%; text-align: center; box-sizing: border-box; }
+
+        .del-btn { display: none; position: absolute; top: -10px; right: -10px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .admin-mode .del-btn { display: block; }
+
+        .admin-box { background: #fff; border: 2px solid var(--admin); padding: 20px; border-radius: 10px; margin-top: 20px; }
+        input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 1rem; }
+        .btn-save { background: var(--admin); color: white; border: none; padding: 15px; width: 100%; border-radius: 6px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="menu-toggle" onclick="toggleMenu()">☰ Menyu</div>
+    <div style="font-weight:bold; letter-spacing: 1px;">TARIXCHI</div>
+</nav>
+
+<div class="sidebar" id="sidebar">
+    <div class="close-btn" onclick="toggleMenu()">×</div>
+    <a href="#" onclick="showPage('intro')">🏛 Tarix nima?</a>
+    <a href="#" onclick="showPage('periods')">⏳ Davrlar</a>
+    <a href="#" onclick="showPage('books')">📚 Darsliklar</a>
+    <a href="#" onclick="showPage('guides')">📝 Qo‘llanmalar</a>
+    <a href="#" onclick="showPage('channels')">📢 Kanallarimiz</a>
+    <a href="#" onclick="showPage('sites')">🌐 Saytlarimiz</a>
+    <a href="#" onclick="showPage('videos')">🎬 Videolar</a>
+    <a href="#" onclick="showPage('admin')">🔐 Admin</a>
+</div>
+
+<div class="container">
+    <div id="intro" class="page active-page"><h1>Tarix o‘zi nima?</h1><div id="intro-list"></div></div>
+    <div id="periods" class="page"><h1>Tarixiy Davrlar</h1><div id="periods-list"></div></div>
+    <div id="books" class="page"><h1>Darsliklar</h1><div id="books-list"></div></div>
+    <div id="guides" class="page"><h1>Qo‘llanmalar</h1><div id="guides-list"></div></div>
+    <div id="channels" class="page"><h1>Kanallar</h1><div id="channels-list"></div></div>
+    <div id="sites" class="page"><h1>Saytlar</h1><div id="sites-list"></div></div>
+    <div id="videos" class="page"><h1>Videolar</h1><div id="videos-list"></div></div>
+
+    <div id="admin" class="page">
+        <h1>Boshqaruv</h1>
+        <div id="login-form">
+            <input type="password" id="admin-pass" placeholder="Parolni kiriting">
+            <button onclick="login()" style="width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:6px;">Kirish</button>
+        </div>
+
+        <div id="panel" style="display:none">
+            <div class="admin-box">
+                <h3>Yangi ma'lumot qo‘shish</h3>
+                <select id="form-target">
+                    <option value="intro">Tarix nima?</option>
+                    <option value="periods">Davrlar</option>
+                    <option value="books">Darsliklar</option>
+                    <option value="guides">Qo‘llanmalar</option>
+                    <option value="channels">Kanallar</option>
+                    <option value="sites">Saytlar</option>
+                    <option value="videos">Videolar</option>
+                </select>
+                <input type="text" id="form-title" placeholder="Sarlavha">
+                <textarea id="form-desc" placeholder="Tavsif"></textarea>
+                <input type="text" id="form-link" placeholder="Havola (Masalan: YouTube yoki Telegram link)">
+                <label style="font-size: 0.8rem; color: #666;">Media yuklash (Rasm/Audio):</label>
+                <input type="file" id="form-file" accept="image/*, audio/*">
+                <button class="btn-save" onclick="addItem()">SAQLASH</button>
+            </div>
+            <button onclick="logout()" style="margin-top:20px; background:none; border:none; color:red; cursor:pointer;">Chiqish</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let db = JSON.parse(localStorage.getItem('tarixHubProDB')) || {
+        intro: [], periods: [], books: [], guides: [], channels: [], sites: [], videos: []
+    };
+
+    let currentFileBase64 = "";
+
+    // Faylni o'qish
+    document.getElementById('form-file').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onloadend = () => { currentFileBase64 = reader.result; };
+        if (file) reader.readAsDataURL(file);
+    });
+
+    function toggleMenu() { document.getElementById('sidebar').classList.toggle('open'); }
+
+    function showPage(id) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+        document.getElementById(id).classList.add('active-page');
+        if(window.innerWidth < 800) toggleMenu();
+    }
+
+    function render() {
+        Object.keys(db).forEach(key => {
+            const list = document.getElementById(key + '-list');
+            if(!list) return;
+            list.innerHTML = db[key].map((item, i) => `
+                <div class="card">
+                    <button class="del-btn" onclick="removeItem('${key}', ${i})">×</button>
+                    ${item.media ? (item.media.startsWith('data:audio') ? `<audio controls src="${item.media}" style="width:100%"></audio>` : `<img src="${item.media}">`) : ''}
+                    <h3>${item.title}</h3>
+                    <p>${item.desc}</p>
+                    ${item.link ? `<a href="${item.link}" target="_blank" class="btn-link">Havolaga o‘tish</a>` : ''}
+                </div>
+            `).join('');
+        });
+    }
+
+    function login() {
+        if(document.getElementById('admin-pass').value === "Tarixchi") {
+            document.getElementById('login-form').style.display = "none";
+            document.getElementById('panel').style.display = "block";
+            document.body.classList.add('admin-mode');
+        } else { alert("Xato parol!"); }
+    }
+
+    function addItem() {
+        const target = document.getElementById('form-target').value;
+        const newItem = {
+            title: document.getElementById('form-title').value,
+            desc: document.getElementById('form-desc').value,
+            link: document.getElementById('form-link').value,
+            media: currentFileBase64
+        };
+        db[target].push(newItem);
+        localStorage.setItem('tarixHubProDB', JSON.stringify(db));
+        currentFileBase64 = "";
+        document.getElementById('form-file').value = "";
+        render();
+        alert("Saqlandi!");
+    }
+
+    function removeItem(key, i) {
+        if(confirm("Haqiqatan ham o‘chirmoqchimisiz?")) {
+            db[key].splice(i, 1);
+            localStorage.setItem('tarixHubProDB', JSON.stringify(db));
+            render();
+        }
+    }
+
+    function logout() { location.reload(); }
+
+    window.onload = render;
+</script>
+
+</body>
+</html>
