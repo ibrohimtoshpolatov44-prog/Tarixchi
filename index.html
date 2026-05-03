@@ -3,61 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tarixchi - Pro</title>
+    <title>Tarixchi - Pro (Dynamic CMS)</title>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <style>
-        :root { --sidebar-bg: #2c3e50; --text-light: #ecf0f1; --accent: #3498db; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f4f7f6; display: flex; }
+        :root { --sidebar-bg: #1e293b; --text-light: #f8fafc; --accent: #0ea5e9; --danger: #ef4444; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; background: #f1f5f9; display: flex; }
 
-        /* Sidebar Dizayni */
-        .sidebar { width: 250px; background: var(--sidebar-bg); height: 100vh; position: fixed; color: var(--text-light); transition: 0.3s; z-index: 1000; left: -250px; }
+        /* Sidebar */
+        .sidebar { width: 280px; background: var(--sidebar-bg); height: 100vh; position: fixed; color: var(--text-light); transition: 0.3s; z-index: 1000; left: -280px; box-shadow: 5px 0 15px rgba(0,0,0,0.2); }
         .sidebar.active { left: 0; }
-        .sidebar-header { padding: 20px; font-weight: bold; font-size: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; }
-        .menu-list { list-style: none; padding: 0; margin: 0; }
+        .sidebar-header { padding: 20px; font-weight: bold; font-size: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .menu-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; height: calc(100% - 70px); }
         .menu-item { padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; display: flex; align-items: center; transition: 0.2s; }
-        .menu-item:hover { background: rgba(255,255,255,0.1); }
-        .menu-item span { margin-right: 15px; font-size: 18px; }
+        .menu-item:hover { background: rgba(14, 165, 233, 0.1); color: var(--accent); }
+        .menu-item span { margin-right: 15px; font-size: 20px; }
 
-        /* Asosiy Kontent */
-        .main-content { flex: 1; margin-left: 0; transition: 0.3s; min-height: 100vh; }
-        header { background: white; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; align-items: center; position: sticky; top: 0; z-index: 999; }
-        .menu-toggle { font-size: 24px; cursor: pointer; margin-right: 20px; background: none; border: none; }
+        /* Main */
+        .main-content { flex: 1; transition: 0.3s; min-height: 100vh; width: 100%; }
+        header { background: white; padding: 15px 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; align-items: center; position: sticky; top: 0; z-index: 999; }
+        .menu-toggle { font-size: 24px; cursor: pointer; background: none; border: none; margin-right: 20px; }
         
-        .container { padding: 20px; max-width: 800px; margin: 0 auto; }
-        .page { display: none; }
+        .container { padding: 20px; max-width: 850px; margin: 0 auto; }
+        .page { display: none; animation: fadeIn 0.3s ease; }
         .page.active-page { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Postlar */
-        .post-card { background: white; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden; position: relative; }
-        .post-card img { width: 100%; max-height: 350px; object-fit: cover; }
-        .post-body { padding: 20px; }
-        .del-btn { position: absolute; top: 10px; right: 10px; background: #e74c3c; color: white; border: none; padding: 5px 12px; border-radius: 6px; cursor: pointer; display: none; font-size: 12px; }
-
-        /* Admin Form */
-        .admin-form { background: white; padding: 25px; border-radius: 15px; border-top: 4px solid var(--accent); }
-        input, textarea, select { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .save-btn { background: var(--accent); color: white; border: none; padding: 15px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; }
+        /* Cards */
+        .post-card { background: white; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden; position: relative; border: 1px solid #e2e8f0; }
+        .post-card img { width: 100%; max-height: 400px; object-fit: cover; }
+        .post-body { padding: 20px; line-height: 1.6; }
         
-        /* Overlay */
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 998; }
+        /* Admin Controls */
+        .admin-controls { position: absolute; top: 10px; right: 10px; display: none; gap: 5px; }
+        .btn-del { background: var(--danger); color: white; border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; }
+
+        /* Forms */
+        .admin-section { background: white; padding: 25px; border-radius: 15px; margin-bottom: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border-top: 4px solid var(--accent); }
+        h3 { margin-top: 0; color: var(--sidebar-bg); font-size: 18px; }
+        input, textarea, select { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #cbd5e1; border-radius: 10px; box-sizing: border-box; font-family: inherit; }
+        .save-btn { background: var(--accent); color: white; border: none; padding: 14px; border-radius: 10px; cursor: pointer; width: 100%; font-weight: bold; transition: 0.2s; }
+        .save-btn:hover { opacity: 0.9; }
+        
+        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 998; backdrop-filter: blur(2px); }
         .overlay.active { display: block; }
     </style>
 </head>
 <body>
 
     <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">TARIXCHI <span onclick="toggleMenu()" style="cursor:pointer">&times;</span></div>
-        <ul class="menu-list">
-            <li class="menu-item" onclick="showPage('tarix-nima', '🏛 Tarix nima?')"><span>🏛</span> Tarix nima?</li>
-            <li class="menu-item" onclick="showPage('davrlar', '⏳ Davrlar')"><span>⏳</span> Davrlar</li>
-            <li class="menu-item" onclick="showPage('darsliklar', '📚 Darsliklar')"><span>📚</span> Darsliklar</li>
-            <li class="menu-item" onclick="showPage('qollanmalar', '📝 Qo\'llanmalar')"><span>📝</span> Qo'llanmalar</li>
-            <li class="menu-item" onclick="showPage('kanallar', '📢 Kanallarimiz')"><span>📢</span> Kanallarimiz</li>
-            <li class="menu-item" onclick="showPage('saytlar', '🌐 Saytlarimiz')"><span>🌐</span> Saytlarimiz</li>
-            <li class="menu-item" onclick="showPage('videolar', '🎬 Videolar')"><span>🎬</span> Videolar</li>
-            <li class="menu-item" onclick="checkAdmin()"><span>🔐</span> Admin</li>
-        </ul>
+        <div class="sidebar-header">TARIXCHI PRO <span onclick="toggleMenu()" style="cursor:pointer">&times;</span></div>
+        <ul class="menu-list" id="dynamic-menu">
+            </ul>
     </div>
 
     <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
@@ -65,31 +62,24 @@
     <div class="main-content">
         <header>
             <button class="menu-toggle" onclick="toggleMenu()">&#9776;</button>
-            <h2 id="current-title" style="margin:0; font-size: 18px;">🏛 Tarix nima?</h2>
+            <h2 id="current-title" style="margin:0; font-size: 18px; color: var(--sidebar-bg);">Yuklanmoqda...</h2>
         </header>
 
-        <div class="container">
-            <div id="tarix-nima" class="page active-page"></div>
-            <div id="davrlar" class="page"></div>
-            <div id="darsliklar" class="page"></div>
-            <div id="qollanmalar" class="page"></div>
-            <div id="kanallar" class="page"></div>
-            <div id="saytlar" class="page"></div>
-            <div id="videolar" class="page"></div>
-
+        <div class="container" id="pages-container">
             <div id="admin-panel" class="page">
-                <div class="admin-form">
-                    <h3>🛠 Yangi post yuklash</h3>
+                <div class="admin-section">
+                    <h3>➕ Yangi sahifa (bo'lim) yaratish</h3>
+                    <input type="text" id="new-cat-name" placeholder="Sahifa nomi (Masalan: Musiqa)">
+                    <input type="text" id="new-cat-id" placeholder="Sahifa ID-si (Masalan: music)">
+                    <input type="text" id="new-cat-icon" placeholder="Ikonka (Masalan: 🎵)">
+                    <button class="save-btn" style="background:#10b981" onclick="createPage()">Sahifani yaratish ✨</button>
+                </div>
+
+                <div class="admin-section">
+                    <h3>🛠 Post yuklash</h3>
                     <select id="p-cat">
-                        <option value="tarix-nima">Tarix nima?</option>
-                        <option value="davrlar">Davrlar</option>
-                        <option value="darsliklar">Darsliklar</option>
-                        <option value="qollanmalar">Qo'llanmalar</option>
-                        <option value="kanallar">Kanallarimiz</option>
-                        <option value="saytlar">Saytlarimiz</option>
-                        <option value="videolar">Videolar</option>
-                    </select>
-                    <textarea id="p-html" rows="8" placeholder="HTML dizayn kodini shu yerga tashlang..."></textarea>
+                        </select>
+                    <textarea id="p-html" rows="8" placeholder="HTML kod yoki matnni shu yerga joylang..."></textarea>
                     <input type="file" id="p-file" accept="image/*">
                     <button class="save-btn" onclick="upload()">Chop etish 🚀</button>
                 </div>
@@ -113,6 +103,92 @@
     let isAdmin = false;
     let base64 = "";
 
+    // 1. SAHIFALARNI VA MENYUNI YUKLASH
+    function loadPlatform() {
+        db.ref('categories').on('value', (snapshot) => {
+            const menu = document.getElementById('dynamic-menu');
+            const container = document.getElementById('pages-container');
+            const select = document.getElementById('p-cat');
+            
+            // Tozalash (Admin paneldan tashqari)
+            menu.innerHTML = "";
+            select.innerHTML = "";
+            document.querySelectorAll('.dynamic-page').forEach(p => p.remove());
+
+            const cats = snapshot.val();
+            if(cats) {
+                Object.keys(cats).forEach((key, index) => {
+                    const c = cats[key];
+                    
+                    // Sidebar menyuga qo'shish
+                    menu.innerHTML += `<li class="menu-item" onclick="showPage('${c.id}', '${c.icon} ${c.name}')"><span>${c.icon}</span> ${c.name}</li>`;
+                    
+                    // Konteynerda sahifa uchun joy yaratish
+                    const pageDiv = document.createElement('div');
+                    pageDiv.id = c.id;
+                    pageDiv.className = 'page dynamic-page';
+                    container.prepend(pageDiv);
+
+                    // Post yuklash selectiga qo'shish
+                    select.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+
+                    // Postlarni yuklashni boshlash
+                    loadPosts(c.id);
+
+                    // Birinchi sahifani ochish
+                    if(index === 0 && !isAdmin) showPage(c.id, c.icon + " " + c.name);
+                });
+            }
+            // Admin panel har doim oxirida
+            menu.innerHTML += `<li class="menu-item" onclick="checkAdmin()"><span>🔐</span> Admin</li>`;
+        });
+    }
+
+    // 2. YANGI SAHIFA YARATISH
+    function createPage() {
+        const name = document.getElementById('new-cat-name').value;
+        const id = document.getElementById('new-cat-id').value.toLowerCase().replace(/\s+/g, '');
+        const icon = document.getElementById('new-cat-icon').value;
+
+        if(!name || !id) return alert("Nom va ID shart!");
+
+        db.ref('categories/' + id).set({
+            name: name,
+            id: id,
+            icon: icon || "📄"
+        }).then(() => {
+            alert("Yangi sahifa ochildi! ✅");
+            document.getElementById('new-cat-name').value = "";
+            document.getElementById('new-cat-id').value = "";
+        });
+    }
+
+    // 3. POSTLARNI YUKLASH
+    function loadPosts(catId) {
+        db.ref('pro_posts/' + catId).on('value', (s) => {
+            const area = document.getElementById(catId);
+            if(!area) return;
+            area.innerHTML = "";
+            const data = s.val();
+            if(data) {
+                Object.keys(data).reverse().forEach(key => {
+                    const p = data[key];
+                    area.innerHTML += `
+                        <div class="post-card">
+                            <div class="admin-controls" style="display:${isAdmin?'flex':'none'}">
+                                <button class="btn-del" onclick="removePost('${catId}','${key}')">O'chirish</button>
+                            </div>
+                            ${p.img ? `<img src="${p.img}">` : ''}
+                            <div class="post-body">${p.content}</div>
+                        </div>`;
+                });
+            } else {
+                area.innerHTML = "<p style='text-align:center; color:gray; padding:20px;'>Hozircha ma'lumot yo'q.</p>";
+            }
+        });
+    }
+
+    // Yordamchi funksiyalar
     function toggleMenu() {
         document.getElementById('sidebar').classList.toggle('active');
         document.getElementById('overlay').classList.toggle('active');
@@ -120,19 +196,19 @@
 
     function showPage(id, title) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
-        document.getElementById(id).classList.add('active-page');
+        const target = document.getElementById(id);
+        if(target) target.classList.add('active-page');
         document.getElementById('current-title').innerText = title;
-        toggleMenu();
+        if(document.getElementById('sidebar').classList.contains('active')) toggleMenu();
         window.scrollTo(0,0);
     }
 
     function checkAdmin() {
-        const p = prompt("Admin parolini kiriting:");
-        if(p === "777") {
+        if(prompt("Parol?") === "777") {
             isAdmin = true;
             showPage('admin-panel', '🔐 Admin Panel');
-            document.querySelectorAll('.del-btn').forEach(b => b.style.display = 'block');
-        } else { alert("Xato!"); }
+            document.querySelectorAll('.admin-controls').forEach(b => b.style.display = 'flex');
+        }
     }
 
     document.getElementById('p-file').addEventListener('change', (e) => {
@@ -150,32 +226,15 @@
             content: html,
             img: base64,
             time: new Date().toLocaleString()
-        }).then(() => { alert("Post yuklandi!"); location.reload(); });
+        }).then(() => { alert("Yuklandi!"); location.reload(); });
     }
 
-    function remove(cat, id) {
+    function removePost(cat, id) {
         if(confirm("O'chirilsinmi?")) db.ref(`pro_posts/${cat}/${id}`).remove();
     }
 
-    const categories = ['tarix-nima','davrlar','darsliklar','qollanmalar','kanallar','saytlar','videolar'];
-    categories.forEach(cat => {
-        db.ref('pro_posts/' + cat).on('value', (s) => {
-            const area = document.getElementById(cat);
-            area.innerHTML = "";
-            const data = s.val();
-            if(data) {
-                Object.keys(data).reverse().forEach(key => {
-                    const p = data[key];
-                    area.innerHTML += `
-                        <div class="post-card">
-                            <button class="del-btn" style="display:${isAdmin?'block':'none'}" onclick="remove('${cat}','${key}')">O'chirish</button>
-                            ${p.img ? `<img src="${p.img}">` : ''}
-                            <div class="post-body">${p.content}</div>
-                        </div>`;
-                });
-            } else { area.innerHTML = "<p style='text-align:center; color:gray;'>Ma'lumot yo'q.</p>"; }
-        });
-    });
+    // Boshlash
+    loadPlatform();
 </script>
 </body>
 </html>
