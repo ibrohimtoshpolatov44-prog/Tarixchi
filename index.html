@@ -3,123 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tarixchi Pro - Ultimate Edition</title>
+    <title>Tarixchi Pro - Stabil Versiya</title>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --sidebar-bg: #1e293b; --text-light: #f8fafc; --accent: #38bdf8; --danger: #ef4444; --success: #22c55e; --warning: #f59e0b; }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; background: #f1f5f9; display: flex; overflow-x: hidden; }
+        :root { --main-bg: #f8fafc; --sidebar-bg: #1e293b; --accent: #0ea5e9; --card-bg: #ffffff; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; background: var(--main-bg); color: #334155; }
 
-        /* Sidebar */
-        .sidebar { width: 280px; background: var(--sidebar-bg); height: 100vh; position: fixed; color: var(--text-light); transition: 0.3s; z-index: 1000; left: -280px; box-shadow: 4px 0 15px rgba(0,0,0,0.3); }
+        /* Sidebar & Layout */
+        .sidebar { width: 280px; background: var(--sidebar-bg); height: 100vh; position: fixed; left: -280px; transition: 0.3s; z-index: 1001; color: white; box-shadow: 5px 0 15px rgba(0,0,0,0.2); }
         .sidebar.active { left: 0; }
-        .sidebar-header { padding: 25px; font-weight: bold; font-size: 22px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; color: var(--accent); }
-        .menu-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; height: calc(100% - 80px); }
-        .menu-item { padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; display: flex; align-items: center; transition: 0.2s; }
-        .menu-item:hover { background: rgba(56, 189, 248, 0.1); color: var(--accent); }
-        .menu-item span { margin-right: 15px; font-size: 20px; }
-
-        /* Main Content */
-        .main-content { flex: 1; min-height: 100vh; width: 100%; transition: 0.3s; }
-        header { background: white; padding: 15px 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; align-items: center; position: sticky; top: 0; z-index: 999; }
-        .menu-toggle { font-size: 24px; cursor: pointer; background: none; border: none; margin-right: 20px; color: var(--sidebar-bg); }
-        .container { padding: 20px; max-width: 900px; margin: 0 auto; }
-        .page { display: none; animation: fadeIn 0.4s ease; }
-        .page.active-page { display: block; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* "Kun Faktori" Blok */
-        .daily-fact { background: linear-gradient(135deg, #38bdf8, #2563eb); color: white; padding: 20px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2); }
-
-        /* Cards */
-        .post-card { background: white; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden; position: relative; border: 1px solid #e2e8f0; }
-        .post-card img { width: 100%; max-height: 400px; object-fit: cover; }
-        .post-body { padding: 20px; line-height: 1.6; }
-        
-        /* Admin Controls */
-        .admin-btns { position: absolute; top: 10px; right: 10px; display: none; gap: 8px; }
-        .btn-del { background: var(--danger); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
-        .btn-edit { background: var(--warning); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
-
-        /* Forms */
-        .admin-form { background: white; padding: 30px; border-radius: 20px; border-top: 5px solid var(--accent); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        input, textarea, select { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 15px; box-sizing: border-box; }
-        .save-btn { background: var(--accent); color: white; border: none; padding: 15px; border-radius: 10px; cursor: pointer; width: 100%; font-weight: bold; font-size: 16px; }
-
-        /* Quiz & Tools */
-        .timer-box { font-size: 28px; color: var(--danger); text-align: center; font-weight: bold; margin-bottom: 25px; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 998; backdrop-filter: blur(2px); }
+        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; backdrop-filter: blur(2px); }
         .overlay.active { display: block; }
+
+        header { background: white; padding: 15px 20px; display: flex; align-items: center; position: sticky; top: 0; z-index: 999; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .menu-btn { font-size: 24px; background: none; border: none; cursor: pointer; margin-right: 15px; }
+
+        /* Post Card - Tuzatilgan qismi */
+        .container { padding: 15px; max-width: 800px; margin: 0 auto; }
+        .post-card { 
+            background: var(--card-bg); 
+            border-radius: 12px; 
+            margin-bottom: 20px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+            overflow: visible; /* Akvordeonlar chiqishi uchun */
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #e2e8f0;
+        }
+        .post-card img { width: 100%; border-radius: 12px 12px 0 0; display: block; }
+        .post-content { padding: 15px; }
+
+        /* Admin tugmalari - Post ustiga chiqmaydigan qilindi */
+        .admin-controls { 
+            display: none; 
+            padding: 10px; 
+            background: #f1f5f9; 
+            border-bottom: 1px solid #e2e8f0;
+            justify-content: flex-end; 
+            gap: 10px;
+            border-radius: 12px 12px 0 0;
+        }
+        .btn-edit { background: #f59e0b; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+        .btn-del { background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+
+        /* Menyular */
+        .menu-list { list-style: none; padding: 0; }
+        .menu-item { padding: 15px 25px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.2s; }
+        .menu-item:hover { background: rgba(255,255,255,0.1); }
+
+        .page { display: none; }
+        .page.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Admin Form */
+        .admin-form { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        textarea { width: 100%; box-sizing: border-box; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; }
+        select, input { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #cbd5e1; box-sizing: border-box; }
+        .submit-btn { background: var(--accent); color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">TARIXCHI PRO <span onclick="toggleMenu()" style="cursor:pointer">&times;</span></div>
-        <ul class="menu-list">
-            <li class="menu-item" onclick="showPage('home', '🏠 Asosiy sahifa')"><span>🏠</span> Asosiy</li>
-            <li class="menu-item" onclick="showPage('tarix-nima', '🏛 Tarix nima?')"><span>🏛</span> Tarix nima?</li>
-            <li class="menu-item" onclick="showPage('davrlar', '⏳ Davrlar')"><span>⏳</span> Davrlar</li>
-            <li class="menu-item" onclick="showPage('lugat', '📖 Tarixiy Lug\'at')"><span>📖</span> Lug'at</li>
-            <li class="menu-item" onclick="showPage('shaxslar', '👑 Buyuk Shaxslar')"><span>👑</span> Shaxslar</li>
-            <li class="menu-item" onclick="showPage('darsliklar', '📚 Darsliklar')"><span>📚</span> Darsliklar</li>
-            <li class="menu-item" onclick="showPage('qollanmalar', '📝 Qo\'llanmalar')"><span>📝</span> Qo'llanmalar</li>
-            <li class="menu-item" onclick="showPage('kanallar', '📢 Kanallar')"><span>📢</span> Kanallar</li>
-            <li class="menu-item" onclick="checkAdmin()"><span>🔐</span> Admin Panel</li>
+        <div style="padding: 20px; font-weight: bold; font-size: 20px; border-bottom: 1px solid #334155;">TARIXCHI BOT</div>
+        <ul class="menu-list" id="main-menu">
+            <li class="menu-item" onclick="showPage('home', '🏠 Asosiy')">Asosiy</li>
+            <li class="menu-item" onclick="showPage('davrlar', '⏳ Davrlar')">Davrlar</li>
+            <li class="menu-item" onclick="showPage('tarix-nima', '🏛 Tarix nima?')">Tarix nima?</li>
+            <li class="menu-item" onclick="showPage('darsliklar', '📚 Darsliklar')">Darsliklar</li>
+            <li class="menu-item" onclick="checkAdmin()">🔐 Admin</li>
         </ul>
     </div>
 
     <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
-    <div class="main-content">
-        <header>
-            <button class="menu-toggle" onclick="toggleMenu()">&#9776;</button>
-            <h2 id="current-title" style="margin:0; font-size: 20px; color: var(--sidebar-bg);">🏠 Asosiy sahifa</h2>
-        </header>
+    <header>
+        <button class="menu-btn" onclick="toggleMenu()">☰</button>
+        <h3 id="page-title" style="margin:0;">🏠 Asosiy</h3>
+    </header>
 
-        <div class="container">
-            <div id="home" class="page active-page">
-                <div class="daily-fact">
-                    <h3 style="margin:0 0 10px 0;">🗓 Bugun tarixdan bir parcha:</h3>
-                    <p id="fact-text" style="margin:0; font-size: 16px; opacity: 0.95;">Yuklanmoqda...</p>
-                </div>
-                <div id="home-posts"></div>
-            </div>
+    <div class="container">
+        <div id="home" class="page active"></div>
+        <div id="davrlar" class="page"></div>
+        <div id="tarix-nima" class="page"></div>
+        <div id="darsliklar" class="page"></div>
 
-            <div id="tarix-nima" class="page"></div>
-            <div id="davrlar" class="page"></div>
-            <div id="lugat" class="page"></div>
-            <div id="shaxslar" class="page"></div>
-            <div id="darsliklar" class="page"></div>
-            <div id="qollanmalar" class="page"></div>
-            <div id="kanallar" class="page"></div>
-
-            <div id="admin-panel" class="page">
-                <div class="admin-form">
-                    <h3 id="form-title">🛠 Yangi Post Qo'shish</h3>
-                    <select id="p-cat">
-                        <option value="home">Asosiy sahifa (Kun faktori)</option>
-                        <option value="tarix-nima">Tarix nima?</option>
-                        <option value="davrlar">Davrlar</option>
-                        <option value="lugat">Tarixiy Lug'at</option>
-                        <option value="shaxslar">Buyuk Shaxslar</option>
-                        <option value="darsliklar">Darsliklar</option>
-                        <option value="qollanmalar">Qo'llanmalar</option>
-                        <option value="kanallar">Kanallar</option>
-                    </select>
-                    <textarea id="p-html" rows="10" placeholder="HTML kod yoki matnni shu yerga joylang..."></textarea>
-                    <input type="file" id="p-file" accept="image/*">
-                    <button class="save-btn" id="upload-btn" onclick="upload()">Yuklash / Yangilash 🚀</button>
-                    <button class="save-btn" style="background:#64748b; margin-top:10px;" onclick="resetForm()">Bekor qilish</button>
-                </div>
+        <div id="admin-panel" class="page">
+            <div class="admin-form">
+                <h3 id="form-header">Yangi Post</h3>
+                <select id="p-cat">
+                    <option value="home">Asosiy</option>
+                    <option value="davrlar">Davrlar</option>
+                    <option value="tarix-nima">Tarix nima?</option>
+                    <option value="darsliklar">Darsliklar</option>
+                </select>
+                <textarea id="p-content" rows="8" placeholder="HTML kodni shu yerga..."></textarea>
+                <input type="file" id="p-file" accept="image/*">
+                <button class="submit-btn" onclick="savePost()">Saqlash 🚀</button>
+                <button onclick="resetForm()" style="margin-top:10px; width:100%; background:none; border:none; color:gray; cursor:pointer;">Bekor qilish</button>
             </div>
         </div>
     </div>
 
 <script>
-    // FIREBASE CONFIG (O'zingizniki bilan tekshiring)
     const firebaseConfig = {
       apiKey: "AIzaSyALt04YmpCH0_rOqVPCL952gKRa8jQj_hY",
       authDomain: "tarixchi-8ae25.firebaseapp.com",
@@ -131,143 +119,97 @@
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    
+
     let isAdmin = false;
-    let base64 = "";
-    let editMode = false;
-    let currentEditId = null;
-    let currentEditCat = null;
-
-    // Kun faktori mantiqi (Sana bo'yicha)
-    const today = new Date();
-    const dateKey = `${today.getDate()}-${today.getMonth()+1}`;
-    
-    function setDailyFact() {
-        db.ref('pro_posts/home').limitToLast(1).on('value', s => {
-            const data = s.val();
-            if(data) {
-                const lastKey = Object.keys(data)[0];
-                document.getElementById('fact-text').innerHTML = data[lastKey].content;
-            } else {
-                document.getElementById('fact-text').innerText = "Bugun bilim olish uchun ajoyib kun!";
-            }
-        });
-    }
-    setDailyFact();
-
-    // Sahifa almashinuvi
-    function showPage(id, title) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
-        document.getElementById(id).classList.add('active-page');
-        document.getElementById('current-title').innerText = title;
-        if(document.getElementById('sidebar').classList.contains('active')) toggleMenu();
-        window.scrollTo(0,0);
-    }
+    let imgData = "";
+    let editId = null;
 
     function toggleMenu() {
         document.getElementById('sidebar').classList.toggle('active');
         document.getElementById('overlay').classList.toggle('active');
     }
 
-    function checkAdmin() {
-        if(prompt("Admin parolini kiriting:") === "777") {
-            isAdmin = true;
-            showPage('admin-panel', '🔐 Admin Boshqaruvi');
-            document.querySelectorAll('.admin-btns').forEach(b => b.style.display = 'flex');
-        } else { alert("Xato parol!"); }
+    function showPage(id, title) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.getElementById('page-title').innerText = title;
+        if(document.getElementById('sidebar').classList.contains('active')) toggleMenu();
+        window.scrollTo(0,0);
     }
 
-    // Rasm yuklash (Base64)
-    document.getElementById('p-file').addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        const reader = new FileReader();
-        reader.onload = () => { base64 = reader.result; };
-        reader.readAsDataURL(file);
-    });
+    function checkAdmin() {
+        if(prompt("Parol?") === "777") {
+            isAdmin = true;
+            showPage('admin-panel', '🔐 Admin Panel');
+            document.querySelectorAll('.admin-controls').forEach(d => d.style.display = 'flex');
+        }
+    }
 
-    // TAHRIRLASH REJIMI
-    function startEdit(cat, id, content, img) {
-        editMode = true;
-        currentEditId = id;
-        currentEditCat = cat;
-        
+    document.getElementById('p-file').onchange = (e) => {
+        const reader = new FileReader();
+        reader.onload = () => imgData = reader.result;
+        reader.readAsDataURL(e.target.files[0]);
+    };
+
+    function savePost() {
+        const cat = document.getElementById('p-cat').value;
+        const html = document.getElementById('p-content').value;
+        if(!html) return;
+
+        const data = { content: html, img: imgData, time: Date.now() };
+
+        if(editId) {
+            db.ref(`pro_posts/${cat}/${editId}`).update(data).then(() => {
+                alert("Yangilandi!"); location.reload();
+            });
+        } else {
+            db.ref(`pro_posts/${cat}`).push(data).then(() => {
+                alert("Yuklandi!"); location.reload();
+            });
+        }
+    }
+
+    function editPost(cat, id, content, img) {
+        editId = id;
         document.getElementById('p-cat').value = cat;
-        document.getElementById('p-html').value = content;
-        base64 = img || "";
-        document.getElementById('form-title').innerText = "📝 Postni Tahrirlash";
-        document.getElementById('upload-btn').innerText = "O'zgarishlarni Saqlash ✅";
-        
-        showPage('admin-panel', '📝 Tahrirlash');
+        document.getElementById('p-content').value = content;
+        imgData = img;
+        document.getElementById('form-header').innerText = "Tahrirlash";
+        showPage('admin-panel', '📝 Tahrir');
+    }
+
+    function deletePost(cat, id) {
+        if(confirm("O'chirilsinmi?")) db.ref(`pro_posts/${cat}/${id}`).remove();
     }
 
     function resetForm() {
-        editMode = false; currentEditId = null; currentEditCat = null;
-        document.getElementById('p-html').value = "";
-        document.getElementById('p-file').value = "";
-        base64 = "";
-        document.getElementById('form-title').innerText = "🛠 Yangi Post Qo'shish";
-        document.getElementById('upload-btn').innerText = "Yuklash / Yangilash 🚀";
+        editId = null;
+        document.getElementById('p-content').value = "";
+        document.getElementById('form-header').innerText = "Yangi Post";
     }
 
-    // FIREBASE BILAN ISHLASH (PUSH & UPDATE)
-    function upload() {
-        const cat = document.getElementById('p-cat').value;
-        const html = document.getElementById('p-html').value;
-        if(!html) return alert("Kontentni kiriting!");
-
-        const postData = {
-            content: html,
-            img: base64,
-            timestamp: Date.now()
-        };
-
-        if(editMode) {
-            db.ref(`pro_posts/${currentEditCat}/${currentEditId}`).update(postData)
-            .then(() => { alert("Yangilandi!"); resetForm(); location.reload(); });
-        } else {
-            db.ref(`pro_posts/${cat}`).push(postData)
-            .then(() => { alert("Yuklandi!"); resetForm(); location.reload(); });
-        }
-    }
-
-    function removePost(cat, id) {
-        if(confirm("Ushbu postni o'chirasizmi?")) {
-            db.ref(`pro_posts/${cat}/${id}`).remove();
-        }
-    }
-
-    // POSTLARNI KO'RSATISH
-    const sections = ['home','tarix-nima','davrlar','lugat','shaxslar','darsliklar','qollanmalar','kanallar'];
-    sections.forEach(c => {
-        db.ref('pro_posts/' + c).on('value', (s) => {
-            const area = (c === 'home') ? document.getElementById('home-posts') : document.getElementById(c);
-            if(!area) return;
+    const cats = ['home','davrlar','tarix-nima','darsliklar'];
+    cats.forEach(c => {
+        db.ref('pro_posts/'+c).on('value', s => {
+            const area = document.getElementById(c);
             area.innerHTML = "";
-            const data = s.val();
-            if(data) {
-                Object.keys(data).reverse().forEach(key => {
-                    const p = data[key];
+            const val = s.val();
+            if(val) {
+                Object.keys(val).reverse().forEach(key => {
+                    const post = val[key];
                     area.innerHTML += `
                         <div class="post-card">
-                            <div class="admin-btns" style="display:${isAdmin ? 'flex' : 'none'}">
-                                <button class="btn-edit" onclick="startEdit('${c}','${key}', \`${p.content}\`, '${p.img}')">Tahrir</button>
-                                <button class="btn-del" onclick="removePost('${c}','${key}')">O'chirish</button>
+                            <div class="admin-controls" style="display:${isAdmin?'flex':'none'}">
+                                <button class="btn-edit" onclick="editPost('${c}','${key}', \`${post.content}\`, '${post.img}')">Tahrir</button>
+                                <button class="btn-del" onclick="deletePost('${c}','${key}')">O'chirish</button>
                             </div>
-                            ${p.img ? `<img src="${p.img}">` : ''}
-                            <div class="post-body">${p.content}</div>
+                            ${post.img ? `<img src="${post.img}">` : ''}
+                            <div class="post-content">${post.content}</div>
                         </div>`;
                 });
-            } else {
-                area.innerHTML = "<p style='text-align:center; color:gray; padding:20px;'>Hozircha ma'lumot yo'q...</p>";
             }
         });
     });
-
-    // Maxsus: openQuiz funksiyasi (agar test kodingizni yuklasangiz kerak bo'ladi)
-    window.openQuiz = function() {
-        // Test sahifasiga o'tish yoki modal ochish mantiqi
-        alert("Test yuklanmoqda...");
-    }
 </script>
 </body>
 </html>
