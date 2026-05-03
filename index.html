@@ -3,106 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tarixchi Pro - Stabil Versiya</title>
+    <title>Tarixchi - Pro</title>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <style>
-        :root { --main-bg: #f8fafc; --sidebar-bg: #1e293b; --accent: #0ea5e9; --card-bg: #ffffff; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; background: var(--main-bg); color: #334155; }
+        :root { --sidebar-bg: #2c3e50; --text-light: #ecf0f1; --accent: #3498db; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f4f7f6; display: flex; }
 
-        /* Sidebar & Layout */
-        .sidebar { width: 280px; background: var(--sidebar-bg); height: 100vh; position: fixed; left: -280px; transition: 0.3s; z-index: 1001; color: white; box-shadow: 5px 0 15px rgba(0,0,0,0.2); }
+        /* Sidebar Dizayni */
+        .sidebar { width: 250px; background: var(--sidebar-bg); height: 100vh; position: fixed; color: var(--text-light); transition: 0.3s; z-index: 1000; left: -250px; }
         .sidebar.active { left: 0; }
-        .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; backdrop-filter: blur(2px); }
-        .overlay.active { display: block; }
-
-        header { background: white; padding: 15px 20px; display: flex; align-items: center; position: sticky; top: 0; z-index: 999; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .menu-btn { font-size: 24px; background: none; border: none; cursor: pointer; margin-right: 15px; }
-
-        /* Post Card - Tuzatilgan qismi */
-        .container { padding: 15px; max-width: 800px; margin: 0 auto; }
-        .post-card { 
-            background: var(--card-bg); 
-            border-radius: 12px; 
-            margin-bottom: 20px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
-            overflow: visible; /* Akvordeonlar chiqishi uchun */
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            border: 1px solid #e2e8f0;
-        }
-        .post-card img { width: 100%; border-radius: 12px 12px 0 0; display: block; }
-        .post-content { padding: 15px; }
-
-        /* Admin tugmalari - Post ustiga chiqmaydigan qilindi */
-        .admin-controls { 
-            display: none; 
-            padding: 10px; 
-            background: #f1f5f9; 
-            border-bottom: 1px solid #e2e8f0;
-            justify-content: flex-end; 
-            gap: 10px;
-            border-radius: 12px 12px 0 0;
-        }
-        .btn-edit { background: #f59e0b; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
-        .btn-del { background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
-
-        /* Menyular */
-        .menu-list { list-style: none; padding: 0; }
-        .menu-item { padding: 15px 25px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.2s; }
+        .sidebar-header { padding: 20px; font-weight: bold; font-size: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; }
+        .menu-list { list-style: none; padding: 0; margin: 0; }
+        .menu-item { padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; display: flex; align-items: center; transition: 0.2s; }
         .menu-item:hover { background: rgba(255,255,255,0.1); }
+        .menu-item span { margin-right: 15px; font-size: 18px; }
 
+        /* Asosiy Kontent */
+        .main-content { flex: 1; margin-left: 0; transition: 0.3s; min-height: 100vh; }
+        header { background: white; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; align-items: center; position: sticky; top: 0; z-index: 999; }
+        .menu-toggle { font-size: 24px; cursor: pointer; margin-right: 20px; background: none; border: none; }
+        
+        .container { padding: 20px; max-width: 800px; margin: 0 auto; }
         .page { display: none; }
-        .page.active { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .page.active-page { display: block; }
+
+        /* Postlar */
+        .post-card { background: white; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden; position: relative; }
+        .post-card img { width: 100%; max-height: 350px; object-fit: cover; }
+        .post-body { padding: 20px; }
+        .del-btn { position: absolute; top: 10px; right: 10px; background: #e74c3c; color: white; border: none; padding: 5px 12px; border-radius: 6px; cursor: pointer; display: none; font-size: 12px; }
 
         /* Admin Form */
-        .admin-form { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        textarea { width: 100%; box-sizing: border-box; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; }
-        select, input { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #cbd5e1; box-sizing: border-box; }
-        .submit-btn { background: var(--accent); color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .admin-form { background: white; padding: 25px; border-radius: 15px; border-top: 4px solid var(--accent); }
+        input, textarea, select { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .save-btn { background: var(--accent); color: white; border: none; padding: 15px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; }
+        
+        /* Overlay */
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 998; }
+        .overlay.active { display: block; }
     </style>
 </head>
 <body>
 
     <div class="sidebar" id="sidebar">
-        <div style="padding: 20px; font-weight: bold; font-size: 20px; border-bottom: 1px solid #334155;">TARIXCHI BOT</div>
-        <ul class="menu-list" id="main-menu">
-            <li class="menu-item" onclick="showPage('home', '🏠 Asosiy')">Asosiy</li>
-            <li class="menu-item" onclick="showPage('davrlar', '⏳ Davrlar')">Davrlar</li>
-            <li class="menu-item" onclick="showPage('tarix-nima', '🏛 Tarix nima?')">Tarix nima?</li>
-            <li class="menu-item" onclick="showPage('darsliklar', '📚 Darsliklar')">Darsliklar</li>
-            <li class="menu-item" onclick="checkAdmin()">🔐 Admin</li>
+        <div class="sidebar-header">TARIXCHI <span onclick="toggleMenu()" style="cursor:pointer">&times;</span></div>
+        <ul class="menu-list">
+            <li class="menu-item" onclick="showPage('tarix-nima', '🏛 Tarix nima?')"><span>🏛</span> Tarix nima?</li>
+            <li class="menu-item" onclick="showPage('davrlar', '⏳ Davrlar')"><span>⏳</span> Davrlar</li>
+            <li class="menu-item" onclick="showPage('darsliklar', '📚 Darsliklar')"><span>📚</span> Darsliklar</li>
+            <li class="menu-item" onclick="showPage('qollanmalar', '📝 Qo\'llanmalar')"><span>📝</span> Qo'llanmalar</li>
+            <li class="menu-item" onclick="showPage('kanallar', '📢 Kanallarimiz')"><span>📢</span> Kanallarimiz</li>
+            <li class="menu-item" onclick="showPage('saytlar', '🌐 Saytlarimiz')"><span>🌐</span> Saytlarimiz</li>
+            <li class="menu-item" onclick="showPage('videolar', '🎬 Videolar')"><span>🎬</span> Videolar</li>
+            <li class="menu-item" onclick="checkAdmin()"><span>🔐</span> Admin</li>
         </ul>
     </div>
 
     <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
-    <header>
-        <button class="menu-btn" onclick="toggleMenu()">☰</button>
-        <h3 id="page-title" style="margin:0;">🏠 Asosiy</h3>
-    </header>
+    <div class="main-content">
+        <header>
+            <button class="menu-toggle" onclick="toggleMenu()">&#9776;</button>
+            <h2 id="current-title" style="margin:0; font-size: 18px;">🏛 Tarix nima?</h2>
+        </header>
 
-    <div class="container">
-        <div id="home" class="page active"></div>
-        <div id="davrlar" class="page"></div>
-        <div id="tarix-nima" class="page"></div>
-        <div id="darsliklar" class="page"></div>
+        <div class="container">
+            <div id="tarix-nima" class="page active-page"></div>
+            <div id="davrlar" class="page"></div>
+            <div id="darsliklar" class="page"></div>
+            <div id="qollanmalar" class="page"></div>
+            <div id="kanallar" class="page"></div>
+            <div id="saytlar" class="page"></div>
+            <div id="videolar" class="page"></div>
 
-        <div id="admin-panel" class="page">
-            <div class="admin-form">
-                <h3 id="form-header">Yangi Post</h3>
-                <select id="p-cat">
-                    <option value="home">Asosiy</option>
-                    <option value="davrlar">Davrlar</option>
-                    <option value="tarix-nima">Tarix nima?</option>
-                    <option value="darsliklar">Darsliklar</option>
-                </select>
-                <textarea id="p-content" rows="8" placeholder="HTML kodni shu yerga..."></textarea>
-                <input type="file" id="p-file" accept="image/*">
-                <button class="submit-btn" onclick="savePost()">Saqlash 🚀</button>
-                <button onclick="resetForm()" style="margin-top:10px; width:100%; background:none; border:none; color:gray; cursor:pointer;">Bekor qilish</button>
+            <div id="admin-panel" class="page">
+                <div class="admin-form">
+                    <h3>🛠 Yangi post yuklash</h3>
+                    <select id="p-cat">
+                        <option value="tarix-nima">Tarix nima?</option>
+                        <option value="davrlar">Davrlar</option>
+                        <option value="darsliklar">Darsliklar</option>
+                        <option value="qollanmalar">Qo'llanmalar</option>
+                        <option value="kanallar">Kanallarimiz</option>
+                        <option value="saytlar">Saytlarimiz</option>
+                        <option value="videolar">Videolar</option>
+                    </select>
+                    <textarea id="p-html" rows="8" placeholder="HTML dizayn kodini shu yerga tashlang..."></textarea>
+                    <input type="file" id="p-file" accept="image/*">
+                    <button class="save-btn" onclick="upload()">Chop etish 🚀</button>
+                </div>
             </div>
         </div>
     </div>
@@ -117,12 +107,11 @@
       messagingSenderId: "243206919519",
       appId: "1:243206919519:web:bac7c64a07ccb089cb92ea"
     };
+
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-
     let isAdmin = false;
-    let imgData = "";
-    let editId = null;
+    let base64 = "";
 
     function toggleMenu() {
         document.getElementById('sidebar').classList.toggle('active');
@@ -130,84 +119,61 @@
     }
 
     function showPage(id, title) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        document.getElementById('page-title').innerText = title;
-        if(document.getElementById('sidebar').classList.contains('active')) toggleMenu();
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+        document.getElementById(id).classList.add('active-page');
+        document.getElementById('current-title').innerText = title;
+        toggleMenu();
         window.scrollTo(0,0);
     }
 
     function checkAdmin() {
-        if(prompt("Parol?") === "777") {
+        const p = prompt("Admin parolini kiriting:");
+        if(p === "777") {
             isAdmin = true;
             showPage('admin-panel', '🔐 Admin Panel');
-            document.querySelectorAll('.admin-controls').forEach(d => d.style.display = 'flex');
-        }
+            document.querySelectorAll('.del-btn').forEach(b => b.style.display = 'block');
+        } else { alert("Xato!"); }
     }
 
-    document.getElementById('p-file').onchange = (e) => {
-        const reader = new FileReader();
-        reader.onload = () => imgData = reader.result;
-        reader.readAsDataURL(e.target.files[0]);
-    };
+    document.getElementById('p-file').addEventListener('change', (e) => {
+        const fr = new FileReader();
+        fr.onload = () => { base64 = fr.result; };
+        fr.readAsDataURL(e.target.files[0]);
+    });
 
-    function savePost() {
+    function upload() {
         const cat = document.getElementById('p-cat').value;
-        const html = document.getElementById('p-content').value;
-        if(!html) return;
-
-        const data = { content: html, img: imgData, time: Date.now() };
-
-        if(editId) {
-            db.ref(`pro_posts/${cat}/${editId}`).update(data).then(() => {
-                alert("Yangilandi!"); location.reload();
-            });
-        } else {
-            db.ref(`pro_posts/${cat}`).push(data).then(() => {
-                alert("Yuklandi!"); location.reload();
-            });
-        }
+        const html = document.getElementById('p-html').value;
+        if(!html) return alert("Kod kiriting!");
+        
+        db.ref('pro_posts/' + cat).push({
+            content: html,
+            img: base64,
+            time: new Date().toLocaleString()
+        }).then(() => { alert("Post yuklandi!"); location.reload(); });
     }
 
-    function editPost(cat, id, content, img) {
-        editId = id;
-        document.getElementById('p-cat').value = cat;
-        document.getElementById('p-content').value = content;
-        imgData = img;
-        document.getElementById('form-header').innerText = "Tahrirlash";
-        showPage('admin-panel', '📝 Tahrir');
-    }
-
-    function deletePost(cat, id) {
+    function remove(cat, id) {
         if(confirm("O'chirilsinmi?")) db.ref(`pro_posts/${cat}/${id}`).remove();
     }
 
-    function resetForm() {
-        editId = null;
-        document.getElementById('p-content').value = "";
-        document.getElementById('form-header').innerText = "Yangi Post";
-    }
-
-    const cats = ['home','davrlar','tarix-nima','darsliklar'];
-    cats.forEach(c => {
-        db.ref('pro_posts/'+c).on('value', s => {
-            const area = document.getElementById(c);
+    const categories = ['tarix-nima','davrlar','darsliklar','qollanmalar','kanallar','saytlar','videolar'];
+    categories.forEach(cat => {
+        db.ref('pro_posts/' + cat).on('value', (s) => {
+            const area = document.getElementById(cat);
             area.innerHTML = "";
-            const val = s.val();
-            if(val) {
-                Object.keys(val).reverse().forEach(key => {
-                    const post = val[key];
+            const data = s.val();
+            if(data) {
+                Object.keys(data).reverse().forEach(key => {
+                    const p = data[key];
                     area.innerHTML += `
                         <div class="post-card">
-                            <div class="admin-controls" style="display:${isAdmin?'flex':'none'}">
-                                <button class="btn-edit" onclick="editPost('${c}','${key}', \`${post.content}\`, '${post.img}')">Tahrir</button>
-                                <button class="btn-del" onclick="deletePost('${c}','${key}')">O'chirish</button>
-                            </div>
-                            ${post.img ? `<img src="${post.img}">` : ''}
-                            <div class="post-content">${post.content}</div>
+                            <button class="del-btn" style="display:${isAdmin?'block':'none'}" onclick="remove('${cat}','${key}')">O'chirish</button>
+                            ${p.img ? `<img src="${p.img}">` : ''}
+                            <div class="post-body">${p.content}</div>
                         </div>`;
                 });
-            }
+            } else { area.innerHTML = "<p style='text-align:center; color:gray;'>Ma'lumot yo'q.</p>"; }
         });
     });
 </script>
